@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>cpp files\WIN32</Filter>
+    </ClCompile>
+    <ClCompile Include="vulkanRender.cpp">
+      <Filter>cpp files\vulkan</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vulkanRender.h">
+      <Filter>header files\vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="macro.h">
+      <Filter>header files\WIN32</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="cpp files">
+      <UniqueIdentifier>{bba44761-82d1-41e5-aec5-d6546ab3cf4a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header files">
+      <UniqueIdentifier>{939418fe-53a7-4f0e-9ca5-d4dc40c36cc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header files\vulkan">
+      <UniqueIdentifier>{42c4bbfc-499a-44d7-b0e5-00a788d51b1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="header files\WIN32">
+      <UniqueIdentifier>{3c3f30ad-a8f9-423c-bd2c-114d4a3c8ae9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp files\WIN32">
+      <UniqueIdentifier>{14518b8c-18b5-4f3e-a517-1679a24d507c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cpp files\vulkan">
+      <UniqueIdentifier>{31a4187b-62f7-4334-a850-ed321ea3f1df}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
