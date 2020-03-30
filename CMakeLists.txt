@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
+project(vulkanRender)
+include_directories(vulkanRender/depens/include/)
+find_package(Vulkan)
+link_directories(vulkanRender/depens)
+add_executable(vulkanRender vulkanRender/main.cpp vulkanRender/vulkanRender.h vulkanRender/vulkanRender.cpp)
+target_link_libraries(vulkanRender Vulkan::Vulkan)
