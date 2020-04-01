@@ -1,13 +1,8 @@
+#ifdef _WIN64
 #include <windows.h>
+#include "WIN32macro.h"
+#endif
 #include "vulkanRender.h"
-#include "macro.h"
-#include <corecrt_io.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <io.h>
-#include <fcntl.h>
-#include <iostream>
 
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 void AddMenus(HWND);
@@ -15,13 +10,9 @@ void AddMenus(HWND);
 vulkanRender vkRender;
 HMENU hMenu;
 HINSTANCE hinst;
+
 int main() {
-	vkRender.initInstance();
-	vkRender.createSurface(hinst);
-	vkRender.pickPhysicalDevice();
-	vkRender.CreateLogicalDevice();
-	//vkRender.renderLoop();
-	vkRender.VkCleanup();
+	vkRender.vulkanGlfw();
 	return 0;
 }
 
@@ -29,9 +20,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hprevInst, LPSTR args, int ncmdsho
 {
 	WNDCLASSW wc = {  };
 	HWND hwnd = {};
-	vkRender.initInstance();
-	vkRender.createSurface(hInst);
-
+	
 	wc.hbrBackground = (HBRUSH)COLOR_WINDOW;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wc.hInstance = hInst;
@@ -41,7 +30,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hprevInst, LPSTR args, int ncmdsho
 	if (!RegisterClassW(&wc))
 		return -1;
 	
-	CreateWindowW(L"myWindowClass", L"jovk Engine", WS_OVERLAPPED | WS_SYSMENU | WS_VISIBLE | WS_MINIMIZEBOX, 100, 100, 800, 700, NULL, NULL, NULL, NULL);
+	CreateWindowW(L"myWindowClass", L"jovk Engine", WS_OVERLAPPED | WS_SYSMENU | WS_VISIBLE | WS_MINIMIZEBOX, 100, 100, 1080, 1080, NULL, NULL, NULL, NULL);
 	
 	MSG msg = { 0 };
 
@@ -51,13 +40,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hprevInst, LPSTR args, int ncmdsho
 		DispatchMessage(&msg);
 	}
 
-	vkRender.renderLoop();
+	vkRender.WIN32renderLoop();
 
 	return 0;
 }
 
 LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
+	
 	switch (msg)
 	{
 	case WM_COMMAND:
@@ -65,7 +55,7 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		{
 		case FILE_MENU_EXIT:
 			DestroyWindow(hWnd);
-			vkRender.VkCleanup();
+			vkRender.VkWIN32Cleanup();
 			break;
 		case FILE_MENU_NEW:
 			break;
@@ -79,10 +69,12 @@ LRESULT CALLBACK WindowProcedure(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 		break;
 	case WM_CREATE:
 		AddMenus(hWnd);
+		vkRender.vulkanWIN32(hWnd,hinst);
+		vkRender.WIN32renderLoop();
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		vkRender.VkCleanup();
+		vkRender.VkWIN32Cleanup();
 		break;
 	default:
 		return DefWindowProcW(hWnd, msg, wp, lp);

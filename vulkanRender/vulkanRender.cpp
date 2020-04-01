@@ -6,15 +6,7 @@ bool enableValidation = true;
 #else
 bool enableValidation = false;
 #endif
-
-void vulkanRender::renderLoop()
-{
-	while (!windowClose)
-	{
-		
-	}
-}
-
+//instance
 void vulkanRender::initInstance()
 {
 	VkApplicationInfo appInfo = {};
@@ -46,13 +38,24 @@ void vulkanRender::initInstance()
 		throw std::runtime_error("");
 	}
 }
+//window and surface
+void vulkanRender::glfwCreatewindow()
+{
+	glfwInit();
 
-void vulkanRender::createSurface(HINSTANCE hInstance)
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+
+	window = glfwCreateWindow(800, 800, "vulkan", nullptr, nullptr);
+}
+
+void vulkanRender::createSurface(HWND hwnd,HINSTANCE hinstance)
 {
 	VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
 	surfaceInfo.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
 	surfaceInfo.flags = 0;
-	surfaceInfo.hinstance = hInstance;
+	surfaceInfo.hwnd = hwnd;
+	surfaceInfo.hinstance = hinstance;
 
 	if (vkCreateWin32SurfaceKHR(vkInstance, &surfaceInfo, nullptr, &vkSurface) != VK_SUCCESS)
 	{
@@ -60,6 +63,13 @@ void vulkanRender::createSurface(HINSTANCE hInstance)
 	};
 }
 
+void vulkanRender::createGlfwSurface()
+{
+	if (glfwCreateWindowSurface(vkInstance, window, nullptr, &vkSurface) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create surface");
+	}
+}
+//physical device
 void vulkanRender::pickPhysicalDevice()
 {
 	uint32_t physicalDeviceCount = 0;
@@ -67,15 +77,15 @@ void vulkanRender::pickPhysicalDevice()
 	
 	if (physicalDeviceCount > 0)
 	{
-		vkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, &VkPhysicalDevice);
+		vkEnumeratePhysicalDevices(vkInstance, &physicalDeviceCount, &vkPhysicalDevice);
 	}
 	if (physicalDeviceCount == 0)
 	{
 		throw std::runtime_error("failed to find physical device");
 	}
 }
-
-void vulkanRender::CreateLogicalDevice()
+//logical device
+void vulkanRender::createLogicalDevice()
 {
 	float QueueProriety = 1.0f;
 
@@ -95,21 +105,115 @@ void vulkanRender::CreateLogicalDevice()
 	deviceCreateInfo.queueCreateInfoCount = 1;
 	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 
-	if (vkCreateDevice(VkPhysicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
+	if (vkCreateDevice(vkPhysicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create logical device");
 	}
+
+	vkGetDeviceQueue(logicalDevice, 0, 0, &graphicsQueue);
+	vkGetDeviceQueue(logicalDevice, 0, 0, &presentQueue);
+}
+//swapchain
+void vulkanRender::createSwapchain()
+{
+	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, vkSurface, &surfaceCapabilites);
+	
+	uint32_t formatCount = 0;
+	vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, vkSurface, &formatCount, nullptr);
+	vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, vkSurface, &formatCount, &surfaceFormats);
+
+	vkGetPhysicalDeviceSurfaceSupportKHR(vkPhysicalDevice, 0, vkSurface, &surfaceSupport);
+	
+	VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
+	swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+	swapchainCreateInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+	swapchainCreateInfo.surface = vkSurface;
+	swapchainCreateInfo.imageExtent.height = surfaceCapabilites.currentExtent.height;
+	swapchainCreateInfo.imageExtent.width = surfaceCapabilites.currentExtent.width;
+	swapchainCreateInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+	swapchainCreateInfo.preTransform = VK_SURFACE_TRANSFORM_IDENTITY_BIT_KHR;
+	swapchainCreateInfo.minImageCount = surfaceCapabilites.minImageCount;
+	swapchainCreateInfo.imageArrayLayers = surfaceCapabilites.maxImageArrayLayers;
+	swapchainCreateInfo.imageFormat = surfaceFormats.format;
+	swapchainCreateInfo.imageColorSpace = surfaceFormats.colorSpace;
+	swapchainCreateInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+	swapchainCreateInfo.queueFamilyIndexCount = 0;
+	swapchainCreateInfo.pQueueFamilyIndices = 0;
+	swapchainCreateInfo.clipped = VK_TRUE;
+	swapchainCreateInfo.oldSwapchain = VK_NULL_HANDLE;
+
+	if (vkCreateSwapchainKHR(logicalDevice, &swapchainCreateInfo, nullptr, &vkSwapchainKHR) != VK_SUCCESS) {
+		throw std::runtime_error("failed to create swapchain");
+	}
+
+	}
+
+void vulkanRender::recreateSwapchain()
+{
+
+}
+//cleanup
+void vulkanRender::vkGlfwCleanup()
+{
+	vkDestroySwapchainKHR(logicalDevice, vkSwapchainKHR, nullptr);
+	vkDestroyDevice(logicalDevice, nullptr);
+	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
+	vkDestroyInstance(vkInstance, nullptr);
+
+	glfwDestroyWindow(window);
+	glfwTerminate();
 }
 
-void vulkanRender::VkCleanup()
+void vulkanRender::VkWIN32Cleanup()
 {
+	vkDestroySwapchainKHR(logicalDevice, vkSwapchainKHR, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
 	vkDestroyInstance(vkInstance, nullptr);
 	windowClose = true;
 }
+//run
+void vulkanRender::vulkanWIN32(HWND hwnd,HINSTANCE hinstance)
+{
+	initInstance();
+	createSurface(hwnd,hinstance);
+	pickPhysicalDevice();
+	createLogicalDevice();
+	createSwapchain();
+}
 
-void vulkanRender::vulkan()
+void vulkanRender::vulkanGlfw()
+{
+	glfwCreatewindow();
+	initInstance();
+	createGlfwSurface();
+	pickPhysicalDevice();
+	createLogicalDevice();
+	createSwapchain();
+	GlfwRenderLoop();
+	vkGlfwCleanup();
+}
+//render loop
+void vulkanRender::GlfwRenderLoop()
+{
+	while (!glfwWindowShouldClose(window))
+	{
+		glfwPollEvents();
+		
+	}
+	
+}
+
+void vulkanRender::WIN32renderLoop()
+{
+	while (windowClose)
+	{
+		drawFrame();
+	}
+	vkDeviceWaitIdle(logicalDevice);
+}
+//draw frame
+void vulkanRender::drawFrame()
 {
 
 }

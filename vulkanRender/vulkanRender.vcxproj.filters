@@ -12,7 +12,7 @@
     <ClInclude Include="vulkanRender.h">
       <Filter>header files\vulkan</Filter>
     </ClInclude>
-    <ClInclude Include="macro.h">
+    <ClInclude Include="WIN32macro.h">
       <Filter>header files\WIN32</Filter>
     </ClInclude>
   </ItemGroup>
