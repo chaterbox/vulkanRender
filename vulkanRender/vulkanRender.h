@@ -7,17 +7,20 @@
 	#include <Windows.h>
 	#include <vulkan/vulkan_win32.h>
 #endif
-
-#pragma once
+#ifdef __linux__
+	#include <xcb/xcb.h>
+	#include <vulkan/vulkan_xcb.h>
+#endif
  
-
 class vulkanRender
 {
 	//instance
 	void initInstance();
 	//window
 	void glfwCreatewindow();
+	#ifdef _WIN64
 	void createSurface(HWND hwnd,HINSTANCE hinstance);
+	#endif
 	void createGlfwSurface();
 	//physical and logical device
 	void pickPhysicalDevice();
@@ -61,7 +64,9 @@ public:
 	std::vector<const char*>deviceExtensions = {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 	//run
+	#ifdef _WIN64
 	void vulkanWIN32(HWND hwnd,HINSTANCE hinstance);
+	#endif
 	void vulkanGlfw();
 	//render loop
 	void GlfwRenderLoop();

@@ -1,10 +1,18 @@
 #include "vulkanRender.h"
 #include <iostream>
 
-#ifdef _DEBUG
-bool enableValidation = true;
-#else
-bool enableValidation = false;
+#ifdef _WIN64
+	#ifdef _DEBUG
+		bool enableValidation = true;
+	#else
+		bool enableValidation = false;
+	#endif
+#elif __linux__
+	#ifndef NDEBUG
+		bool enableValidation = true;
+	#else
+		bool enableValidation = false;
+	#endif
 #endif
 //instance
 void vulkanRender::initInstance()
@@ -21,7 +29,10 @@ void vulkanRender::initInstance()
 	instanceInfo.pApplicationInfo = &appInfo;
 #ifdef _WIN64
 	instanceExtensions.push_back(VK_KHR_WIN32_SURFACE_EXTENSION_NAME);
-#endif	
+#elif __linux__
+	instanceExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
+#endif
+
 	instanceInfo.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.size());
 	instanceInfo.ppEnabledExtensionNames = instanceExtensions.data();
 	if (enableValidation)
@@ -48,7 +59,7 @@ void vulkanRender::glfwCreatewindow()
 
 	window = glfwCreateWindow(800, 800, "vulkan", nullptr, nullptr);
 }
-
+#ifdef _WIN64
 void vulkanRender::createSurface(HWND hwnd,HINSTANCE hinstance)
 {
 	VkWin32SurfaceCreateInfoKHR surfaceInfo = {};
@@ -62,7 +73,7 @@ void vulkanRender::createSurface(HWND hwnd,HINSTANCE hinstance)
 		throw std::runtime_error("failed to create surface");
 	};
 }
-
+#endif
 void vulkanRender::createGlfwSurface()
 {
 	if (glfwCreateWindowSurface(vkInstance, window, nullptr, &vkSurface) != VK_SUCCESS) {
@@ -178,7 +189,7 @@ void vulkanRender::vkGlfwCleanup()
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
-
+#ifdef _WIN64
 void vulkanRender::VkWIN32Cleanup()
 {
 	vkDestroySwapchainKHR(logicalDevice, vkSwapchainKHR, nullptr);
@@ -187,7 +198,9 @@ void vulkanRender::VkWIN32Cleanup()
 	vkDestroyInstance(vkInstance, nullptr);
 	windowClose = true;
 }
+#endif
 //run
+#ifdef _WIN64
 void vulkanRender::vulkanWIN32(HWND hwnd,HINSTANCE hinstance)
 {
 	initInstance();
@@ -197,7 +210,7 @@ void vulkanRender::vulkanWIN32(HWND hwnd,HINSTANCE hinstance)
 	createSwapchain();
 	//createImageView();
 }
-
+#endif
 void vulkanRender::vulkanGlfw()
 {
 	glfwCreatewindow();
@@ -220,7 +233,7 @@ void vulkanRender::GlfwRenderLoop()
 	}
 	vkDeviceWaitIdle(logicalDevice);
 }
-
+#ifdef _WIN64
 void vulkanRender::WIN32renderLoop()
 {
 	while (windowClose)
@@ -229,6 +242,7 @@ void vulkanRender::WIN32renderLoop()
 	}
 	vkDeviceWaitIdle(logicalDevice);
 }
+#endif
 //draw frame
 void vulkanRender::drawFrame()
 {

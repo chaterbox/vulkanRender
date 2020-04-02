@@ -3,19 +3,19 @@
 #include "WIN32macro.h"
 #endif
 #include "vulkanRender.h"
-
+#ifdef _WIN64
 LRESULT CALLBACK WindowProcedure(HWND, UINT, WPARAM, LPARAM);
 void AddMenus(HWND);
-
-vulkanRender vkRender;
 HMENU hMenu;
 HINSTANCE hinst;
+#endif
+vulkanRender vkRender;
 
 int main() {
 	vkRender.vulkanGlfw();
 	return 0;
 }
-
+#ifdef _WIN64
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hprevInst, LPSTR args, int ncmdshow)
 {
 	WNDCLASSW wc = {  };
@@ -99,4 +99,4 @@ void AddMenus(HWND hWnd)
 	AppendMenu(hHelpMenu, MF_STRING, HELP_MENU_ABOUT, "contact");
 	SetMenu(hWnd, hMenu);
 }
-
+#endif
