@@ -40,8 +40,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hprevInst, LPSTR args, int ncmdsho
 		DispatchMessage(&msg);
 	}
 
-	vkRender.WIN32renderLoop();
-
 	return 0;
 }
 

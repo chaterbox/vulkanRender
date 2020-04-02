@@ -146,12 +146,27 @@ void vulkanRender::createSwapchain()
 		throw std::runtime_error("failed to create swapchain");
 	}
 
+	uint32_t imageCount = 0;
+	vkGetSwapchainImagesKHR(logicalDevice, vkSwapchainKHR, &imageCount, nullptr);
+	vkGetSwapchainImagesKHR(logicalDevice, vkSwapchainKHR, &imageCount, &swapChainImage);
+
 	}
 
 void vulkanRender::recreateSwapchain()
 {
 
 }
+
+void vulkanRender::createImageView()
+{
+	VkImageViewCreateInfo imageViewCreateInfo = {};
+	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+
+	if (vkCreateImageView(logicalDevice, &imageViewCreateInfo, nullptr, &vkImageview)) {
+		throw std::runtime_error("failed to create imageView");
+	}
+}
+
 //cleanup
 void vulkanRender::vkGlfwCleanup()
 {
@@ -180,6 +195,7 @@ void vulkanRender::vulkanWIN32(HWND hwnd,HINSTANCE hinstance)
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapchain();
+	//createImageView();
 }
 
 void vulkanRender::vulkanGlfw()
@@ -190,6 +206,7 @@ void vulkanRender::vulkanGlfw()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapchain();
+	//createImageView();
 	GlfwRenderLoop();
 	vkGlfwCleanup();
 }
@@ -201,7 +218,7 @@ void vulkanRender::GlfwRenderLoop()
 		glfwPollEvents();
 		
 	}
-	
+	vkDeviceWaitIdle(logicalDevice);
 }
 
 void vulkanRender::WIN32renderLoop()

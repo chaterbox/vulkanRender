@@ -25,6 +25,8 @@ class vulkanRender
 	//swapchain
 	void createSwapchain();
 	void recreateSwapchain();
+	//image view
+	void createImageView();
 	//cleanup
 	void vkGlfwCleanup();
 	//draw frame
@@ -49,7 +51,9 @@ public:
 	VkSurfaceCapabilitiesKHR surfaceCapabilites;
 	VkSurfaceFormatKHR surfaceFormats;
 	VkBool32 surfaceSupport;
-	std::vector<VkImage>swapChainImages;
+	VkImage swapChainImage;
+	//image view
+	VkImageView vkImageview;
 
 	//extensions and layers
 	std::vector<const char*>instanceExtensions = { VK_KHR_SURFACE_EXTENSION_NAME,VK_EXT_DEBUG_UTILS_EXTENSION_NAME };
