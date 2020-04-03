@@ -172,6 +172,18 @@ void vulkanRender::createImageView()
 {
 	VkImageViewCreateInfo imageViewCreateInfo = {};
 	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	imageViewCreateInfo.format = VK_FORMAT_B8G8R8A8_UNORM;
+	imageViewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_R;
+	imageViewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_G;
+	imageViewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_B;
+	imageViewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_A;
+	imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+	imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
+	imageViewCreateInfo.subresourceRange.levelCount = 1;
+	imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
+	imageViewCreateInfo.subresourceRange.layerCount = 1;
+	imageViewCreateInfo.image = swapChainImage;
 
 	if (vkCreateImageView(logicalDevice, &imageViewCreateInfo, nullptr, &vkImageview)) {
 		throw std::runtime_error("failed to create imageView");
@@ -181,6 +193,7 @@ void vulkanRender::createImageView()
 //cleanup
 void vulkanRender::vkGlfwCleanup()
 {
+	vkDestroyImageView(logicalDevice, vkImageview, nullptr);
 	vkDestroySwapchainKHR(logicalDevice, vkSwapchainKHR, nullptr);
 	vkDestroyDevice(logicalDevice, nullptr);
 	vkDestroySurfaceKHR(vkInstance, vkSurface, nullptr);
@@ -208,7 +221,7 @@ void vulkanRender::vulkanWIN32(HWND hwnd,HINSTANCE hinstance)
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapchain();
-	//createImageView();
+	createImageView();
 }
 #endif
 void vulkanRender::vulkanGlfw()
@@ -219,7 +232,7 @@ void vulkanRender::vulkanGlfw()
 	pickPhysicalDevice();
 	createLogicalDevice();
 	createSwapchain();
-	//createImageView();
+	createImageView();
 	GlfwRenderLoop();
 	vkGlfwCleanup();
 }
