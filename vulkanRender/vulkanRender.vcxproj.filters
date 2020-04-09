@@ -15,6 +15,9 @@
     <ClInclude Include="WIN32macro.h">
       <Filter>header files\WIN32</Filter>
     </ClInclude>
+    <ClInclude Include="queueFamilies.h">
+      <Filter>header files\vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="cpp files">

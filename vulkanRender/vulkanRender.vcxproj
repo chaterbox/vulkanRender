@@ -140,6 +140,7 @@
     <ClCompile Include="vulkanRender.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="queueFamilies.h" />
     <ClInclude Include="WIN32macro.h" />
     <ClInclude Include="vulkanRender.h" />
   </ItemGroup>

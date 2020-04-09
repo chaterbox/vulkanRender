@@ -3,6 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <vector>
+#include <set>
+#include "queueFamilies.h"
 #ifdef _WIN64
 	#include <Windows.h>
 	#include <vulkan/vulkan_win32.h>
@@ -34,6 +36,8 @@ class vulkanRender
 	void vkGlfwCleanup();
 	//draw frame
 	void drawFrame();
+	//utilizes
+	QueueFamilyIndices getQueueFamilies(VkPhysicalDevice device);
 public:
 	vulkanRender() {};
 	//instance

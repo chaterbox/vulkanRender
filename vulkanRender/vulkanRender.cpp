@@ -57,7 +57,7 @@ void vulkanRender::glfwCreatewindow()
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
-	window = glfwCreateWindow(800, 800, "vulkan", nullptr, nullptr);
+	window = glfwCreateWindow(800, 800, "Vulkan", nullptr, nullptr);
 }
 #ifdef _WIN64
 void vulkanRender::createSurface(HWND hwnd,HINSTANCE hinstance)
@@ -98,22 +98,30 @@ void vulkanRender::pickPhysicalDevice()
 //logical device
 void vulkanRender::createLogicalDevice()
 {
-	float QueueProriety = 1.0f;
+	QueueFamilyIndices indices = getQueueFamilies(vkPhysicalDevice);
+	
 
-	VkDeviceQueueCreateInfo graphicsQueueCreateInfo = {};
-	graphicsQueueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	graphicsQueueCreateInfo.pQueuePriorities = &QueueProriety;
-	graphicsQueueCreateInfo.queueFamilyIndex = 0;
-	graphicsQueueCreateInfo.queueCount = 1;
+	std::vector<VkDeviceQueueCreateInfo>queueCreateInfos;
+	std::set<int>queueFamilyIndices = { indices.graphicsFamily, indices.presentFamliy };
 
+	for (int queueFamilyIndex : queueFamilyIndices) {
+		float QueueProriety = 1.0f;
+		VkDeviceQueueCreateInfo queueCreateInfo = {};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.pQueuePriorities = &QueueProriety;
+		queueCreateInfo.queueFamilyIndex = queueFamilyIndex;
+		queueCreateInfo.queueCount = 1;
+
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
 	VkPhysicalDeviceFeatures deviceFeatures = {};
 
 	VkDeviceCreateInfo deviceCreateInfo = {};
 	deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 	deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 	deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
-	deviceCreateInfo.pQueueCreateInfos = &graphicsQueueCreateInfo;
-	deviceCreateInfo.queueCreateInfoCount = 1;
+	deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+	deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
 	deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 
 	if (vkCreateDevice(vkPhysicalDevice, &deviceCreateInfo, nullptr, &logicalDevice) != VK_SUCCESS)
@@ -121,8 +129,9 @@ void vulkanRender::createLogicalDevice()
 		throw std::runtime_error("failed to create logical device");
 	}
 
-	vkGetDeviceQueue(logicalDevice, 0, 0, &graphicsQueue);
-	vkGetDeviceQueue(logicalDevice, 0, 0, &presentQueue);
+	vkGetDeviceQueue(logicalDevice, indices.graphicsFamily, 0, &graphicsQueue);
+	vkGetDeviceQueue(logicalDevice, indices.presentFamliy, 0, &presentQueue);
+	
 }
 //swapchain
 void vulkanRender::createSwapchain()
@@ -133,7 +142,7 @@ void vulkanRender::createSwapchain()
 	vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, vkSurface, &formatCount, nullptr);
 	vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, vkSurface, &formatCount, &surfaceFormats);
 
-	vkGetPhysicalDeviceSurfaceSupportKHR(vkPhysicalDevice, 0, vkSurface, &surfaceSupport);
+	
 	
 	VkSwapchainCreateInfoKHR swapchainCreateInfo = {};
 	swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -260,4 +269,32 @@ void vulkanRender::WIN32renderLoop()
 void vulkanRender::drawFrame()
 {
 
+}
+
+QueueFamilyIndices vulkanRender::getQueueFamilies(VkPhysicalDevice device)
+{
+	QueueFamilyIndices indices;
+	uint32_t queueFamilyCount = 0;
+	vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyCount, nullptr);
+
+	std::vector<VkQueueFamilyProperties>queueFamilyList(queueFamilyCount);
+	vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyCount, queueFamilyList.data());
+	int i = 0;
+	for (const auto& queueFamily : queueFamilyList) {
+		if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+			indices.graphicsFamily = i;
+		}
+		VkBool32 presentationSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(vkPhysicalDevice, i, vkSurface, &presentationSupport);
+
+		if (queueFamily.queueCount > 0 && presentationSupport) {
+			indices.presentFamliy = i;
+		}
+
+		if (indices.isvalid()) {
+			break;
+		}
+		i++;
+	}
+	return indices;
 }
